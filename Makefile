@@ -8,12 +8,12 @@ TARGET = anime-cli
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-    $(CC) -o $@ $^ $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
 %.o: %.c
-    $(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-    rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(TARGET)
 
 .PHONY: all clean
