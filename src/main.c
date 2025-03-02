@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         if (selected_episode) {
             // Get streaming link for the episode
             ui_show_loading();
-            StreamInfo *stream_info = api_get_episode_stream(selected_episode->id, "vidcloud");
+            StreamInfo *stream_info = api_get_episode_stream(selected_episode->id, "vidstreaming");
             
             if (stream_info && stream_info->sources_count > 0) {
                 // Play the episode
