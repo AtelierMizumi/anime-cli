@@ -23,7 +23,7 @@ jobs:
     - name: Create package
       run: |
         mkdir -p dist
-        cp anime-cli.exe dist/anime-cli
+        cp anime-cli dist/anime-cli
         cp README.md LICENSE dist/
         cd dist
         tar -czvf ../anime-cli.tar.gz *
