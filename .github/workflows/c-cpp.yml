@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
     - name: Create package
       run: |
         mkdir -p dist
-        cp anime-cli dist/anime-cli
+        cp anime-cli dist/
         cp README.md LICENSE dist/
         cd dist
         tar -czvf ../anime-cli.tar.gz *
@@ -31,29 +34,16 @@ jobs:
     - name: Generate version
       id: version
       run: echo "version=$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-    
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      
+    - name: Create Release and Upload Asset
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.version.outputs.version }}
-        release_name: Release ${{ steps.version.outputs.version }}
-        draft: false
-        prerelease: false
-        body: |
-          Automated build from commit ${{ github.sha }}
-          
-          **Changes in this release:**
-          ${{ github.event.head_commit.message }}
-    
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./anime-cli.tar.gz
-        asset_name: anime-cli-${{ steps.version.outputs.version }}.tar.gz
-        asset_content_type: application/gzip
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        RELEASE_NOTES="Automated build from commit ${{ github.sha }}\n\n**Changes in this release:**\n${{ github.event.head_commit.message }}"
+        
+        # Create release using GitHub CLI
+        gh release create "v$VERSION" \
+          --title "Release $VERSION" \
+          --notes "$RELEASE_NOTES" \
+          "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz"
