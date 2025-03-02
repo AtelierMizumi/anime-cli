@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -Iinclude -Isrc
 LIBS = -lcurl -ljson-c -lncurses
 SRC = src/main.c src/ui.c src/api.c src/utils.c
 OBJ = $(SRC:.c=.o)
-TARGET = anime-cli
+TARGET = anime-cli.exe
 
 all: $(TARGET)
 
@@ -16,4 +16,6 @@ $(TARGET): $(OBJ)
 clean:
 	rm -f $(OBJ) $(TARGET)
 
-.PHONY: all clean
+rebuild: clean all
+
+.PHONY: all clean rebuild
