@@ -18,4 +18,10 @@ clean:
 
 rebuild: clean all
 
-.PHONY: all clean rebuild
+# Add this target for CI
+dist: $(TARGET)
+	mkdir -p dist
+	cp $(TARGET) README.md LICENSE dist/
+	tar -czvf anime-cli.tar.gz -C dist .
+
+.PHONY: all clean rebuild dist
