@@ -1,54 +1,198 @@
-# Anime CLI
+# 📺 Anime CLI
 
-Anime CLI is a command-line interface application that allows users to search for anime, select an anime from the search results, and choose episodes using the Consumet API. This project is designed to provide a simple and efficient way to explore anime content directly from the terminal.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Lines of code](https://img.shields.io/badge/lines%20of%20code-1.5k%2B-brightgreen.svg)
+![Language](https://img.shields.io/badge/language-C-orange.svg)
+![AUR](https://img.shields.io/badge/AUR-pending-yellow.svg)
+![Dependencies](https://img.shields.io/badge/dependencies-curl%20|%20json--c%20|%20ncurses%20|%20mpv-informational)
 
-## Features
+A terminal-based anime streaming client that allows you to search, browse, and watch anime directly from your terminal using the Consumet API.
 
-- Search for anime titles using keywords.
-- Select an anime from the search results.
-- View and select episodes from the chosen anime.
-- Utilizes the Consumet API for fetching anime data.
+![Terminal Demo](https://i.imgur.com/PLACEHOLDER.gif)
 
-## Requirements
+## 📋 Table of Contents
 
-- GCC or any compatible C compiler
-- Make
-- cURL library (for API requests)
-- JSON-C library (for parsing JSON responses)
+- Features
+- Requirements
+- Installation
+  - From Source
+  - From AUR (Arch User Repository)
+- Usage
+  - Basic Commands
+  - Keyboard Shortcuts
+- Screenshots
+- Development
+- Contributing
+- License
+- Acknowledgements
 
-## Installation
+## ✨ Features
+
+- 🔍 **Search anime** - Find any anime with simple search queries
+- 📺 **Stream episodes** - Watch anime episodes directly from your terminal
+- 🌐 **Multi-provider support** - Uses the Consumet API for reliable access to content (soonTM)
+- 📋 **Episode tracking** - Easy episode selection interface
+- 📱 **Lightweight design** - Minimal resource usage
+- 🔤 **Multi-language subtitles** - Built-in subtitle selection support (very soonTM)
+- ⌨️ **Keyboard navigation** - Fast, intuitive keyboard shortcuts
+
+## 📦 Requirements
+
+- **GCC** or any compatible C compiler
+- **Make** build system
+- **cURL** library for API requests
+- **JSON-C** library for JSON parsing
+- **ncurses** library for terminal UI
+- **mpv** media player for video playback
+
+## 🚀 Installation
+
+### From Source
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/anime-cli.git
+
+   ```bash
+   git clone https://github.com/your-username/anime-cli.git
    cd anime-cli
    ```
 
 2. Build the project:
-   ```
-   make
-   ```
 
-3. Run the application:
-   ```
-   ./anime-cli
+   ```bash
+   make rebuild
    ```
 
-## Usage
+3. Install the program (optional):
 
-After running the application, you will be prompted to enter a search query for anime. The application will display a list of matching anime titles. You can then select an anime to view its episodes.
+   ```bash
+   sudo make install
+   ```
 
-## Running Tests
+### From AUR (Arch User Repository)
 
-To run the unit tests for the API and UI components, use the following command:
+If you're using an Arch-based distribution:
+
+```bash
+# Using your preferred AUR helper, e.g., yay
+yay -S anime-cli
+
+# Or with paru
+paru -S anime-cli
 ```
+
+### Manual Dependencies Installation
+
+```bash
+# For Arch Linux
+sudo pacman -S gcc make curl json-c ncurses mpv
+
+# For Debian/Ubuntu (not tested)
+sudo apt install gcc make libcurl4-openssl-dev libjson-c-dev libncurses-dev mpv
+
+# For Fedora (not tested)
+sudo dnf install gcc make libcurl-devel json-c-devel ncurses-devel mpv
+```
+
+## 📖 Usage
+
+### Basic Commands
+
+Launch anime-cli by running:
+
+```bash
+anime-cli
+```
+
+### Keyboard Shortcuts
+
+**Search Screen:**
+
+- Type your query and press **Enter**
+
+**Anime Selection:**
+
+- **↑/↓**: Navigate through anime list
+- **Enter**: Select anime
+- **Type any text**: Filter anime list
+- **ESC**: Clear filter
+- **q**: Quit to previous screen
+- **Ctrl+C**: Exit program
+
+**Episode Selection:**
+
+- **↑/↓**: Navigate through episodes
+- **Enter**: Watch selected episode
+- **q**: Return to anime search
+
+**Video Playback (MPV):**
+
+- **Space**: Pause/Play
+- **→/←**: Seek forward/backward
+- **j**: Cycle through subtitle tracks
+- **v**: Toggle subtitle visibility
+- **q**: Quit playback and return to episode menu
+
+## 📸 Screenshots
+
+| Search Screen | Anime Selection | Episode Selection |
+|:---:|:---:|:---:|
+| ![Search](/screenshots/Search.png) | ![Selection](/screenshots/Select.png) | ![Episodes](/screenshots/Episodes.png) |
+
+## 🛠️ Development
+
+Run tests:
+
+```bash
 make test
 ```
 
-## Contributing
+Code structure:
 
-Contributions are welcome! If you have suggestions for improvements or new features, please open an issue or submit a pull request.
+- main.c - Main application entry point
+- ui.c - Terminal user interface
+- api.c - API client for Consumet
+- utils.c - Utility functions
 
-## License
+## 🤝 Contributing
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+Contributions are welcome! Here's how you can help:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+Please ensure your code follows the project's style and includes appropriate tests.
+
+## 📜 License
+
+Distributed under the MIT License. See LICENSE for more information.
+
+```markdown
+MIT License
+
+Copyright (c) 2023 Thuan Tran
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions...
+```
+
+## 🙏 Acknowledgements
+
+- [Consumet API](https://github.com/consumet) - For providing the anime data
+- [libcurl](https://curl.se/libcurl/) - For HTTP request handling
+- [json-c](https://github.com/json-c/json-c) - For JSON parsing
+- [ncurses](https://invisible-island.net/ncurses/) - For terminal UI
+- [mpv](https://mpv.io/) - For media playback
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by Thuan Tran and contributors</sub>
+</div>
