@@ -8,7 +8,7 @@
 
 A terminal-based anime streaming client that allows you to search, browse, and watch anime directly from your terminal using the Consumet API.
 
-![Terminal Demo](https://i.imgur.com/PLACEHOLDER.gif)
+This project is primary used to test out the Consumet self-host API which will then be used for the [Kotsune Android App](https://github.com/AtelierMizumi/Kotsune)
 
 ## 📋 Table of Contents
 
