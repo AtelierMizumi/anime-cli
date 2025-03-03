@@ -19,17 +19,31 @@ jobs:
     - name: Generate version
       id: version
       run: |
-        # Try to use last tag, or fall back to date-based version if no tags exist
-        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-        if [ -z "$LATEST_TAG" ]; then
-          # No tag exists, create date-based version
-          VERSION="0.1.0-$(date +'%Y%m%d')"
-        else
-          # Tag exists, use it
-          VERSION="${LATEST_TAG#v}"  # Remove 'v' prefix if present
+        # Extract version from PKGBUILD
+        if [ -f "PKGBUILD" ]; then
+          PKGBUILD_VERSION=$(grep -E '^pkgver=' PKGBUILD | cut -d'=' -f2)
+          if [ -n "$PKGBUILD_VERSION" ]; then
+            VERSION="$PKGBUILD_VERSION"
+            echo "Using version from PKGBUILD: $VERSION"
+          fi
         fi
+        
+        # If PKGBUILD version is not found, fall back to git tag
+        if [ -z "$PKGBUILD_VERSION" ]; then
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            # No tag exists, create date-based version
+            VERSION="0.2.0-$(date +'%Y%m%d%H%M')"
+            echo "No version found in PKGBUILD or git tags. Using fallback version: $VERSION"
+          else
+            # Tag exists, use it
+            VERSION="${LATEST_TAG#v}"  # Remove 'v' prefix if present
+            echo "Using version from git tag: $VERSION"
+          fi
+        fi
+        
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Using version: $VERSION"
+        echo "Using final version: $VERSION"
     
     - name: Install dependencies
       run: |
@@ -57,10 +71,15 @@ jobs:
         VERSION="${{ steps.version.outputs.version }}"
         RELEASE_NOTES="Automated build from commit ${{ github.sha }}\n\n**Changes in this release:**\n${{ github.event.head_commit.message }}"
         
-        # Create release using GitHub CLI
-        gh release create "v$VERSION" \
-          --title "Release $VERSION" \
-          --notes "$RELEASE_NOTES" \
-          "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz" \
-          --target ${{ github.ref }} \
-          || echo "Failed to create release, it may already exist"
+        # Check if this release already exists
+        if gh release view "v$VERSION" &>/dev/null; then
+          echo "Release v$VERSION already exists, updating it"
+          gh release upload "v$VERSION" "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz" --clobber
+        else
+          echo "Creating new release v$VERSION"
+          gh release create "v$VERSION" \
+            --title "Release $VERSION" \
+            --notes "$RELEASE_NOTES" \
+            "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz" \
+            --target ${{ github.ref }}
+        fi
