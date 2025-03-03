@@ -16,10 +16,6 @@ jobs:
       with:
         fetch-depth: 0  # Important for git history-based versioning
     
-    - name: Generate semantic version
-      id: semver
-      uses: bitshifted/git-auto-semver@v1.1.0
-    
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -42,7 +38,6 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        VERSION=${{ steps.semver.outputs.version }}
         RELEASE_NOTES="Automated build from commit ${{ github.sha }}\n\n**Changes in this release:**\n${{ github.event.head_commit.message }}"
         
         # Create release using GitHub CLI
