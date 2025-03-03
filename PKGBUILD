@@ -8,8 +8,7 @@ url="https://github.com/AtelierMizumi/anime-cli"
 license=('MIT')
 depends=('curl' 'json-c' 'ncurses' 'mpv')
 makedepends=('gcc' 'make')
-optdepends=('ffmpeg: for downloading anime episodes'
-            'mpv-vapoursynth: enhanced video playback capabilities')
+optdepends=('ffmpeg: for downloading anime episodes')
 _commit=v${pkgver} # Replace with actual commit hash for better integrity
 source=("git+${url}.git#tag=${_commit}")
 sha256sums=('SKIP')
