@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "anime_ui.h": "c",
+        "manga.h": "c",
+        "zoro.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "config.h": "c"
+    }
+}

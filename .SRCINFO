@@ -1,6 +1,6 @@
 pkgbase = anime-cli
 	pkgdesc = Command-line interface for searching and streaming anime via Consumet API
-	pkgver = 0.1.0
+	pkgver = 0.2.0
 	pkgrel = 1
 	url = https://github.com/AtelierMizumi/anime-cli
 	arch = x86_64
@@ -12,7 +12,7 @@ pkgbase = anime-cli
 	depends = ncurses
 	depends = mpv
 	optdepends = ffmpeg: for downloading anime episodes
-	source = git+https://github.com/AtelierMizumi/anime-cli.git#tag=v0.1.0
+	source = git+https://github.com/AtelierMizumi/anime-cli.git#tag=v02.0
 	sha256sums = SKIP
 
 pkgname = anime-cli

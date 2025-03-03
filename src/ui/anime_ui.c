@@ -1,73 +1,37 @@
-#define _GNU_SOURCE // Add this before includes to get strcasestr
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
-#include "ui.h"
-#include "api.h"
-
+#include "anime_ui.h"
+#include "common/input.h"
+#include "common/display.h"
+#include "../api/providers/zoro.h"
+#include "../api/anime.h"
+#include "../config.h"
 
 #define MAX_QUERY_LENGTH 256
 #define ENTER_KEY 10
 #define ESC_KEY 27
 
-void ui_init() {
-    // Initialize ncurses
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-    curs_set(1); // Show cursor
-    start_color();
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_RED, COLOR_BLACK);
-}
-
-void ui_cleanup() {
-    endwin();
-}
-
-char* ui_get_search_query() {
+char* anime_ui_get_search_query() {
     clear();
     attron(COLOR_PAIR(1));
     mvprintw(1, 1, "Search anime: ");
     attroff(COLOR_PAIR(1));
     refresh();
     
-    char *query = malloc(MAX_QUERY_LENGTH);
-    if (!query) {
-        return NULL;
-    }
-    
-    echo(); // Show user input
-    getstr(query);
-    noecho();
-    
-    return query;
+    return ui_get_text_input(MAX_QUERY_LENGTH);
 }
 
-void ui_show_loading() {
-    clear();
-    attron(COLOR_PAIR(2));
-    mvprintw(1, 1, "Searching...");
-    attroff(COLOR_PAIR(2));
-    refresh();
-}
-
-AnimeInfo* ui_select_anime(SearchResult *results) {
+void* anime_ui_select_anime(SearchResult *results) {
     if (!results || results->total_results <= 0) {
-        clear();
-        attron(COLOR_PAIR(3));
-        mvprintw(1, 1, "No results found.");
-        attroff(COLOR_PAIR(3));
-        getch();
+        ui_show_error("No results found.");
         return NULL;
     }
     
     int choice = 0;
     int scroll_offset = 0;
-    int max_display = LINES - 5; // Reserve some lines for header/footer
+    int max_display = LINES - 5;
     int c;
     char filter[MAX_QUERY_LENGTH] = "";
     int filter_pos = 0;
@@ -103,12 +67,12 @@ AnimeInfo* ui_select_anime(SearchResult *results) {
                 attron(A_REVERSE | COLOR_PAIR(2));
                 mvprintw(line++, 1, "> %s (%d episodes)", 
                          results->results[i].title,
-                         results->results[i].episodes);
+                         results->results[i].episodes_or_chapters);
                 attroff(A_REVERSE | COLOR_PAIR(2));
             } else {
                 mvprintw(line++, 3, "%s (%d episodes)", 
                          results->results[i].title,
-                         results->results[i].episodes);
+                         results->results[i].episodes_or_chapters);
             }
             displayed++;
         }
@@ -173,26 +137,9 @@ AnimeInfo* ui_select_anime(SearchResult *results) {
                 scroll_offset = choice - (choice % max_display);
                 break;
             case ENTER_KEY:
-                // Create AnimeInfo struct for selected anime
-                AnimeInfo *selected = malloc(sizeof(AnimeInfo));
-                if (!selected) return NULL;
-                
-                selected->id = strdup(results->results[choice].id);
-                selected->title = strdup(results->results[choice].title);
-                selected->total_episodes = results->results[choice].episodes;
-                
-                // Extra fields initialized to NULL or 0
-                selected->url = NULL;
-                selected->image = NULL;
-                selected->description = NULL;
-                selected->release_date = NULL;
-                selected->status = NULL;
-                selected->genres = NULL;
-                selected->genres_count = 0;
-                selected->sub_or_dub = NULL;
-                selected->episodes = NULL;
-                
-                return selected;
+                // Get provider API and request detailed anime info
+                const ProviderAPI* api = get_provider_api(get_current_provider());
+                return api->get_anime_info(results->results[choice].id);
             case 'q':
                 return NULL;
         }
@@ -201,41 +148,59 @@ AnimeInfo* ui_select_anime(SearchResult *results) {
     return NULL;
 }
 
-Episode* ui_select_episode(AnimeInfo *anime) {
+// ... existing code ...
+
+void* anime_ui_select_episode(AnimeInfo *anime) {
     if (!anime || !anime->episodes || anime->total_episodes <= 0) {
-        clear();
-        attron(COLOR_PAIR(3));
-        mvprintw(1, 1, "No episodes available for this anime.");
-        attroff(COLOR_PAIR(3));
-        getch();
+        ui_show_error("No episodes available for this anime.");
         return NULL;
     }
     
     int choice = 0;
     int scroll_offset = 0;
-    int max_display = LINES - 5;
+    int max_display = LINES - 7; // Reserve space for header and info
     int c;
     
     while (1) {
         clear();
         int line = 1;
         
-        // Show title
+        // Show title and info
         attron(COLOR_PAIR(1) | A_BOLD);
         mvprintw(line++, 1, "Anime: %s", anime->title);
-        mvprintw(line++, 1, "Select episode:");
-        attroff(COLOR_PAIR(1) | A_BOLD);
+        if (anime->status)
+            mvprintw(line++, 1, "Status: %s", anime->status);
+        attroff(A_BOLD);
+        mvprintw(line++, 1, "Episodes: %d", anime->total_episodes);
+        attroff(COLOR_PAIR(1));
         line++;
+        
+        // Show episode selection title
+        attron(COLOR_PAIR(2) | A_BOLD);
+        mvprintw(line++, 1, "Select episode:");
+        attroff(COLOR_PAIR(2) | A_BOLD);
         
         // Display episodes
         int displayed = 0;
         for (int i = scroll_offset; i < anime->total_episodes && displayed < max_display; i++) {
             if (i == choice) {
                 attron(A_REVERSE | COLOR_PAIR(2));
-                mvprintw(line++, 1, "> Episode %d", anime->episodes[i].number);
+                if (anime->episodes[i].title)
+                    mvprintw(line++, 1, "> Episode %d: %s", 
+                             anime->episodes[i].number,
+                             anime->episodes[i].title);
+                else
+                    mvprintw(line++, 1, "> Episode %d", 
+                             anime->episodes[i].number);
                 attroff(A_REVERSE | COLOR_PAIR(2));
             } else {
-                mvprintw(line++, 3, "Episode %d", anime->episodes[i].number);
+                if (anime->episodes[i].title)
+                    mvprintw(line++, 3, "Episode %d: %s", 
+                             anime->episodes[i].number,
+                             anime->episodes[i].title);
+                else
+                    mvprintw(line++, 3, "Episode %d", 
+                             anime->episodes[i].number);
             }
             displayed++;
         }
@@ -271,7 +236,8 @@ Episode* ui_select_episode(AnimeInfo *anime) {
                 scroll_offset = choice - (choice % max_display);
                 break;
             case ENTER_KEY:
-                return &anime->episodes[choice];
+                // Get the episode ID and fetch stream info
+                return anime->episodes[choice].id;
             case 'q':
                 return NULL;
         }
@@ -280,98 +246,58 @@ Episode* ui_select_episode(AnimeInfo *anime) {
     return NULL;
 }
 
-void ui_show_error(const char *message) {
-    clear();
-    attron(COLOR_PAIR(3) | A_BOLD);
-    mvprintw(1, 1, "Error:");
-    attroff(A_BOLD);
-    mvprintw(2, 1, "%s", message);
-    mvprintw(4, 1, "Press any key to continue...");
-    attroff(COLOR_PAIR(3));
-    refresh();
-    getch();
-}
-
-void ui_play_episode(StreamInfo *stream) {
-    endwin(); // Temporarily exit ncurses mode
-    
+void anime_ui_play_episode(StreamInfo *stream) {
     if (!stream || !stream->sources || stream->sources_count == 0) {
-        printf("No streaming sources available.\n");
-        printf("Press Enter to continue...");
-        getchar();
-        
-        // Reinitialize ncurses before returning
-        initscr();
-        cbreak();
-        noecho();
-        keypad(stdscr, TRUE);
-        curs_set(1);
-        start_color();
-        init_pair(1, COLOR_CYAN, COLOR_BLACK);
-        init_pair(2, COLOR_GREEN, COLOR_BLACK);
-        init_pair(3, COLOR_RED, COLOR_BLACK);
+        ui_show_error("No streaming sources available.");
         return;
     }
     
-    // Find best quality stream (usually the first one)
-    char command[4096] = {0}; // Increased buffer size for many subtitles
+    // Save current terminal state and exit ncurses mode
+    endwin();
     
-    printf("Debug - Stream URL: %s\n", stream->sources[0].url);
-    printf("Debug - Is M3U8: %d\n", stream->sources[0].is_m3u8);
-    printf("Debug - Subtitle count: %d\n", stream->subtitles_count);
+    printf("Loading episode...\n");
+    
+    // Build mpv command with URL and headers
+    char command[4096] = {0};
     
     // Basic mpv command with video URL and improved options
-    if (stream->sources[0].is_m3u8) {
-        // HLS stream needs special handling
-        snprintf(command, sizeof(command), 
-                "mpv --force-window=immediate --cache=yes --demuxer-max-bytes=150M \"%s\"", 
-                stream->sources[0].url);
-    } else {
-        snprintf(command, sizeof(command), "mpv \"%s\"", stream->sources[0].url);
-    }
+    snprintf(command, sizeof(command), 
+             "mpv --force-window=immediate --cache=yes --demuxer-max-bytes=150M \"%s\"", 
+             stream->sources[0].url);
 
     // Add headers if provided
     if (stream->referer) {
-        char header_cmd[256];
-        snprintf(header_cmd, sizeof(header_cmd), " --http-header-fields=\"Referer: %s\"", stream->referer);
+        char header_cmd[512];
+        snprintf(header_cmd, sizeof(header_cmd), 
+                 " --http-header-fields=\"Referer: %s\"", stream->referer);
         strcat(command, header_cmd);
     }
-    
+
     if (stream->user_agent) {
-        char ua_cmd[256];
-        snprintf(ua_cmd, sizeof(ua_cmd), " --user-agent=\"%s\"", stream->user_agent);
+        char ua_cmd[512];
+        snprintf(ua_cmd, sizeof(ua_cmd), 
+                 " --user-agent=\"%s\"", stream->user_agent);
         strcat(command, ua_cmd);
     }
-    
-    // Add subtitle support
+
+    // Add subtitle support with improved handling
     if (stream->subtitles && stream->subtitles_count > 0) {
-        // Find English subtitle index (prefer Crunchyroll if available)
+        // Find English subtitle for default selection
         int english_sub_index = -1;
-        int english_cr_index = -1;
         
         for (int i = 0; i < stream->subtitles_count; i++) {
             if (stream->subtitles[i].url && stream->subtitles[i].lang) {
-                printf("Debug - Subtitle %d: %s (%s)\n", i, stream->subtitles[i].lang, stream->subtitles[i].url);
-                
                 // Skip thumbnail VTT files
-                if (strstr(stream->subtitles[i].url, "thumbnails.vtt") != NULL) {
+                if (strstr(stream->subtitles[i].url, "thumbnails") != NULL) {
                     continue;
                 }
                 
-                // Check for English subtitles
+                // Look for English subtitles
                 if (strstr(stream->subtitles[i].lang, "English") != NULL) {
-                    // Prefer Crunchyroll subtitles
-                    if (strstr(stream->subtitles[i].lang, "Crunchyroll") != NULL) {
-                        english_cr_index = i;
-                    } else if (english_sub_index == -1) {
-                        english_sub_index = i;
-                    }
+                    english_sub_index = i;
                 }
             }
         }
-        
-        // Use Crunchyroll English subtitle if found, otherwise use any English
-        int selected_sub_index = (english_cr_index != -1) ? english_cr_index : english_sub_index;
         
         // Add all valid subtitle files
         int valid_sub_count = 0;
@@ -383,46 +309,106 @@ void ui_play_episode(StreamInfo *stream) {
                 }
                 
                 valid_sub_count++;
-                char sub_cmd[512];
-                snprintf(sub_cmd, sizeof(sub_cmd), " --sub-file=\"%s\"", stream->subtitles[i].url);
+                char sub_cmd[1024];
+                // Only use --sub-file without --sub-name for better compatibility
+                snprintf(sub_cmd, sizeof(sub_cmd), 
+                        " --sub-file=\"%s\"", 
+                        stream->subtitles[i].url);
                 strcat(command, sub_cmd);
+                
+                // Print language info to console for reference
+                printf("Subtitle %d: %s\n", valid_sub_count, stream->subtitles[i].lang);
             }
         }
         
         // Select English subtitle by default if found
-        if (selected_sub_index != -1) {
-            for (int i = 0, valid_idx = 0; i < selected_sub_index; i++) {
-                if (stream->subtitles[i].url && stream->subtitles[i].lang &&
+        if (english_sub_index >= 0) {
+            char sid_cmd[32];
+            // Convert from index to 1-based sid number, accounting for valid subs
+            int sid = 1;
+            for (int i = 0; i < english_sub_index; i++) {
+                if (stream->subtitles[i].url && 
+                    stream->subtitles[i].lang && 
                     strstr(stream->subtitles[i].url, "thumbnails") == NULL) {
-                    valid_idx++;
+                    sid++;
                 }
             }
-            
-            char select_cmd[32];
-            snprintf(select_cmd, sizeof(select_cmd), " --sid=1"); // Start with first subtitle
-            strcat(command, select_cmd);
+            snprintf(sid_cmd, sizeof(sid_cmd), " --sid=%d", sid);
+            strcat(command, sid_cmd);
+            printf("Default subtitle: English (sid=%d)\n", sid);
         }
+        
+        // Enable subtitle visibility by default
+        strcat(command, " --sub-visibility=yes");
     }
     
-    // Print the command for debugging
-    printf("Debug - Command: %s\n", command);
-    
-    // Execute the command2
+    // Execute the command
     system(command);
     
-    printf("\nReturning to episode selection menu. Press Enter to continue...\n");
-    getchar(); // Wait for user input before returning
+    printf("Returning to episode selection. Press Enter to continue...\n");
+    getchar();
     
-    // Fully reinitialize ncurses
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-    curs_set(1);
-    start_color();
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_RED, COLOR_BLACK);
-
+    // Restore terminal state
     refresh();
+}
+
+void anime_ui_main_loop() {
+    while (1) {
+        // Get search query
+        char *query = anime_ui_get_search_query();
+        if (!query || strlen(query) == 0) {
+            free(query);
+            return; // Return to main menu
+        }
+        
+        // Show loading indicator
+        ui_show_loading("Searching anime...");
+        
+        // Search for anime
+        SearchResult *results = anime_search(query);
+        free(query);
+        
+        if (!results || results->total_results == 0) {
+            ui_show_error("No anime found matching your query.");
+            if (results) anime_free_search_results(results);
+            continue;
+        }
+        
+        // Let user select an anime
+        AnimeInfo *selected_anime = anime_ui_select_anime(results);
+        anime_free_search_results(results);
+        
+        if (!selected_anime) {
+            continue; // Return to search
+        }
+        
+        // Loop for selecting and watching episodes
+        int stay_in_episode_menu = 1;
+        while (stay_in_episode_menu) {
+            // Let user select an episode
+            char *episode_id = anime_ui_select_episode(selected_anime);
+            
+            if (episode_id) {
+                // Get streaming link for the episode
+                ui_show_loading("Getting stream data...");
+                StreamInfo *stream_info = anime_get_episode_stream(episode_id, "vidstreaming");
+                
+                if (stream_info && stream_info->sources_count > 0) {
+                    // Play the episode
+                    anime_ui_play_episode(stream_info);
+                    anime_free_stream_info(stream_info);
+                    // After playing, we'll loop back to episode selection
+                } else {
+                    ui_show_error("Failed to get streaming link.");
+                    // Still stay in the episode menu
+                }
+            } else {
+                // User cancelled episode selection, exit the loop
+                stay_in_episode_menu = 0;
+            }
+        }
+        
+        // Clean up anime info before returning to search
+        anime_free_info(selected_anime);
+    }
 }

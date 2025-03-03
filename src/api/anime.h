@@ -1,20 +1,7 @@
-#ifndef API_H
-#define API_H
+#ifndef ANIME_API_H
+#define ANIME_API_H
 
-// Structure to hold an anime result from search
-typedef struct {
-    char *id;
-    char *title;
-    char *image;
-    char *type;
-    int episodes;
-} AnimeResult;
-
-// Structure to hold search results
-typedef struct {
-    int total_results;
-    AnimeResult *results;
-} SearchResult;
+#include "api.h"
 
 // Structure to hold episode information
 typedef struct {
@@ -45,7 +32,7 @@ typedef struct {
     char *url;
     char *quality;
     int is_m3u8;
-} Source;
+} StreamSource;
 
 // Structure to hold subtitle information
 typedef struct {
@@ -57,20 +44,24 @@ typedef struct {
 typedef struct {
     char *referer;
     char *user_agent;
-    Source *sources;
+    StreamSource *sources;
     int sources_count;
     Subtitle *subtitles;
     int subtitles_count;
 } StreamInfo;
 
-// Function declarations
-SearchResult* api_search_anime(const char *query);
-AnimeInfo* api_get_anime_info(const char *anime_id);
-StreamInfo* api_get_episode_stream(const char *episode_id, const char *server);
+// Search for anime with the current provider
+SearchResult* anime_search(const char *query);
 
-// Cleanup functions
-void api_free_search_results(SearchResult *results);
-void api_free_anime_info(AnimeInfo *info);
-void api_free_stream_info(StreamInfo *info);
+// Get detailed anime information
+AnimeInfo* anime_get_info(const char *id);
 
-#endif /* API_H */
+// Get streaming information for an episode
+StreamInfo* anime_get_episode_stream(const char *episode_id, const char *server);
+
+// Free resources
+void anime_free_search_results(SearchResult *results);
+void anime_free_info(AnimeInfo *info);
+void anime_free_stream_info(StreamInfo *info);
+
+#endif /* ANIME_API_H */
