@@ -1,7 +1,22 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude -Isrc
+CFLAGS = -Wall -Wextra -I.
 LIBS = -lcurl -ljson-c -lncurses
-SRC = src/main.c src/ui.c src/api.c src/utils.c
+
+SRC = src/main.c \
+	src/config.c \
+	src/api/api.c \
+	src/api/anime.c \
+	src/api/manga.c \
+	src/api/providers/zoro.c \
+	src/api/providers/mangadex.c \
+	src/ui/ui.c \
+	src/ui/anime_ui.c \
+	src/ui/manga_ui.c \
+	src/ui/common/input.c \
+	src/ui/common/display.c \
+	src/utils/memory.c \
+	src/utils/string.c
+
 OBJ = $(SRC:.c=.o)
 TARGET = anime-cli
 
