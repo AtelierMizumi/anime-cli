@@ -13,8 +13,8 @@ optdepends=(
     'feh: alternative manga viewer'
     'imv: alternative manga viewer'
 )
-_commit=v${pkgver}
-source=("git+${url}.git#tag=${_commit}")
+# Use branch instead of tag
+source=("git+${url}.git#branch=master")
 sha256sums=('SKIP')
 
 build() {
