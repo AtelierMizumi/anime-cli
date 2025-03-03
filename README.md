@@ -62,10 +62,19 @@ This project is primary used to test out the Consumet self-host API which will t
    make rebuild
    ```
 
-3. Install the program (optional):
+### Install
+
+1. Clone the repository:
 
    ```bash
-   sudo make install
+   git clone https://github.com/your-username/anime-cli.git
+   cd anime-cli
+   ```
+
+2. Build the project:
+
+   ```bash
+   makepkg -si
    ```
 
 ### From AUR (Arch User Repository)
@@ -92,6 +101,12 @@ sudo apt install gcc make libcurl4-openssl-dev libjson-c-dev libncurses-dev mpv
 # For Fedora (not tested)
 sudo dnf install gcc make libcurl-devel json-c-devel ncurses-devel mpv
 ```
+
+> [!NOTE]
+>
+> It is recommend to install [uosc](https://github.com/tomasklaen/uosc)
+> to improve the GUI of MPV. You can then choose stream quality, 
+> audio tracks and subtitles.
 
 ## 📖 Usage
 
