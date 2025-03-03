@@ -16,6 +16,21 @@ jobs:
       with:
         fetch-depth: 0  # Important for git history-based versioning
     
+    - name: Generate version
+      id: version
+      run: |
+        # Try to use last tag, or fall back to date-based version if no tags exist
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -z "$LATEST_TAG" ]; then
+          # No tag exists, create date-based version
+          VERSION="0.1.0-$(date +'%Y%m%d')"
+        else
+          # Tag exists, use it
+          VERSION="${LATEST_TAG#v}"  # Remove 'v' prefix if present
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Using version: $VERSION"
+    
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -26,11 +41,12 @@ jobs:
         make rebuild
         
     - name: Create package
+      id: package
       run: |
         mkdir -p dist
         cp anime-cli dist/
         cp README.md LICENSE dist/
-        VERSION=$(git describe --tags --abbrev=0)
+        echo "${{ steps.version.outputs.version }}" > dist/VERSION
         cd dist
         tar -czvf ../anime-cli.tar.gz *
     
@@ -38,10 +54,13 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
+        VERSION="${{ steps.version.outputs.version }}"
         RELEASE_NOTES="Automated build from commit ${{ github.sha }}\n\n**Changes in this release:**\n${{ github.event.head_commit.message }}"
         
         # Create release using GitHub CLI
         gh release create "v$VERSION" \
           --title "Release $VERSION" \
           --notes "$RELEASE_NOTES" \
-          "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz"
+          "./anime-cli.tar.gz#anime-cli-$VERSION.tar.gz" \
+          --target ${{ github.ref }} \
+          || echo "Failed to create release, it may already exist"

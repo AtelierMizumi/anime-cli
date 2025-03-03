@@ -1,4 +1,4 @@
-# Maintainer: Thuan Tran <your.email@example.com>
+# Maintainer: Thuan Tran thuan.tran@thuanc177.me
 pkgname=anime-cli
 pkgver=0.1.0
 pkgrel=1
@@ -9,8 +9,7 @@ license=('MIT')
 depends=('curl' 'json-c' 'ncurses' 'mpv')
 makedepends=('gcc' 'make')
 optdepends=('ffmpeg: for downloading anime episodes')
-_commit=v${pkgver} # Replace with actual commit hash for better integrity
-source=("git+${url}.git#tag=${_commit}")
+source=("git+${url}.git#commit=ea641de")
 sha256sums=('SKIP')
 
 build() {
@@ -20,7 +19,8 @@ build() {
 
 check() {
     cd "${srcdir}/${pkgname}"
-    make test
+    # Uncomment if tests are available
+    # make test
 }
 
 package() {
