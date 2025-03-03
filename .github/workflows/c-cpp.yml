@@ -30,7 +30,7 @@ jobs:
         mkdir -p dist
         cp anime-cli dist/
         cp README.md LICENSE dist/
-        echo "${{ steps.semver.outputs.version }}" > dist/VERSION
+        VERSION=$(git describe --tags --abbrev=0)
         cd dist
         tar -czvf ../anime-cli.tar.gz *
     
