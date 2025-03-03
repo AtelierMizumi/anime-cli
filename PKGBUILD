@@ -1,22 +1,32 @@
+# Maintainer: Thuan Tran <your.email@example.com>
 pkgname=anime-cli
-pkgver=1.0.0
+pkgver=0.1.0
 pkgrel=1
-pkgdesc="A command-line interface for searching and selecting anime using the Consumet API"
-arch=("x86_64")
-url="https://github.com/yourusername/anime-cli"
-license=("MIT")
-depends=("gcc" "make" "curl" "json-c" "ncurses" "mpv")
-source=("git+https://github.com/yourusername/anime-cli.git")
-md5sums=("SKIP")
+pkgdesc="Command-line interface for searching and streaming anime via Consumet API"
+arch=('x86_64')
+url="https://github.com/AtelierMizumi/anime-cli"
+license=('MIT')
+depends=('curl' 'json-c' 'ncurses' 'mpv')
+makedepends=('gcc' 'make')
+optdepends=('ffmpeg: for downloading anime episodes'
+            'mpv-vapoursynth: enhanced video playback capabilities')
+_commit=v${pkgver} # Replace with actual commit hash for better integrity
+source=("git+${url}.git#tag=${_commit}")
+sha256sums=('SKIP')
 
 build() {
-    cd "$srcdir/$pkgname"
-    make
+    cd "${srcdir}/${pkgname}"
+    make -j$(nproc)
+}
+
+check() {
+    cd "${srcdir}/${pkgname}"
+    make test
 }
 
 package() {
-    cd "$srcdir/$pkgname"
-    install -Dm755 anime-cli "$pkgdir/usr/bin/anime-cli"
-    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
-    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    cd "${srcdir}/${pkgname}"
+    install -Dm755 anime-cli "${pkgdir}/usr/bin/anime-cli"
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
 }
