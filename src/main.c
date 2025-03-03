@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <version.h>
 #include "config.h"
 #include "ui/ui.h"
 #include "ui/anime_ui.h"

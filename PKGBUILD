@@ -1,6 +1,6 @@
 # Maintainer: Thuan Tran <your.email@example.com>
 pkgname=anime-cli
-pkgver=0.3.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Command-line interface for searching and streaming anime and manga via Consumet API"
 arch=('x86_64')
@@ -13,7 +13,7 @@ optdepends=(
     'feh: alternative manga viewer'
     'imv: alternative manga viewer'
 )
-_commit=v${pkgver} # Replace with actual commit hash for better integrity
+_commit=v${pkgver}
 source=("git+${url}.git#tag=${_commit}")
 sha256sums=('SKIP')
 
