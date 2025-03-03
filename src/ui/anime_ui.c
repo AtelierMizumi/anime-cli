@@ -272,17 +272,17 @@ void anime_ui_play_episode(StreamInfo *stream) {
                  " --http-header-fields=\"Referer: %s\"", stream->referer);
         strcat(command, header_cmd);
     }
-    
+
     if (stream->user_agent) {
         char ua_cmd[512];
         snprintf(ua_cmd, sizeof(ua_cmd), 
                  " --user-agent=\"%s\"", stream->user_agent);
         strcat(command, ua_cmd);
     }
-    
-    // Add subtitle support
+
+    // Add subtitle support with improved handling
     if (stream->subtitles && stream->subtitles_count > 0) {
-        // Find English subtitle
+        // Find English subtitle for default selection
         int english_sub_index = -1;
         
         for (int i = 0; i < stream->subtitles_count; i++) {
@@ -295,12 +295,12 @@ void anime_ui_play_episode(StreamInfo *stream) {
                 // Look for English subtitles
                 if (strstr(stream->subtitles[i].lang, "English") != NULL) {
                     english_sub_index = i;
-                    break;
                 }
             }
         }
         
         // Add all valid subtitle files
+        int valid_sub_count = 0;
         for (int i = 0; i < stream->subtitles_count; i++) {
             if (stream->subtitles[i].url && stream->subtitles[i].lang) {
                 // Skip thumbnail VTT files
@@ -308,16 +308,38 @@ void anime_ui_play_episode(StreamInfo *stream) {
                     continue;
                 }
                 
-                char sub_cmd[512];
-                snprintf(sub_cmd, sizeof(sub_cmd), " --sub-file=\"%s\"", stream->subtitles[i].url);
+                valid_sub_count++;
+                char sub_cmd[1024];
+                // Only use --sub-file without --sub-name for better compatibility
+                snprintf(sub_cmd, sizeof(sub_cmd), 
+                        " --sub-file=\"%s\"", 
+                        stream->subtitles[i].url);
                 strcat(command, sub_cmd);
+                
+                // Print language info to console for reference
+                printf("Subtitle %d: %s\n", valid_sub_count, stream->subtitles[i].lang);
             }
         }
         
         // Select English subtitle by default if found
-        if (english_sub_index != -1) {
-            strcat(command, " --sid=1");
+        if (english_sub_index >= 0) {
+            char sid_cmd[32];
+            // Convert from index to 1-based sid number, accounting for valid subs
+            int sid = 1;
+            for (int i = 0; i < english_sub_index; i++) {
+                if (stream->subtitles[i].url && 
+                    stream->subtitles[i].lang && 
+                    strstr(stream->subtitles[i].url, "thumbnails") == NULL) {
+                    sid++;
+                }
+            }
+            snprintf(sid_cmd, sizeof(sid_cmd), " --sid=%d", sid);
+            strcat(command, sid_cmd);
+            printf("Default subtitle: English (sid=%d)\n", sid);
         }
+        
+        // Enable subtitle visibility by default
+        strcat(command, " --sub-visibility=yes");
     }
     
     // Execute the command

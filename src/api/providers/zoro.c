@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <json-c/json.h>
 #include "zoro.h"
+#include "../../config.h"
 #include "../../utils/memory.h"
 
 #define ZORO_API_BASE_URL "https://consumet.thuanc177.me/anime/zoro"
@@ -33,7 +34,7 @@ SearchResult* zoro_search_anime(const char *query) {
     char url[512];
     
     // Build URL for anime search endpoint
-    snprintf(url, sizeof(url), "%s/%s?query=%s", ZORO_API_BASE_URL, "search", query);
+    snprintf(url, sizeof(url), "%s/%s", ZORO_API_BASE_URL, query);
     
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -181,7 +182,7 @@ ZoroAnimeInfo* zoro_get_anime_info(const char *anime_id) {
     char url[512];
     
     // Build URL for anime info endpoint
-    snprintf(url, sizeof(url), "%s/info/%s", ZORO_API_BASE_URL, anime_id);
+    snprintf(url, sizeof(url), "%s/info?id=%s", ZORO_API_BASE_URL, anime_id);
     
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -304,9 +305,8 @@ ZoroStreamInfo* zoro_get_episode_stream(const char *episode_id, const char *serv
     char url[512];
     
     // Build URL for episode streaming info endpoint
-    snprintf(url, sizeof(url), "%s/watch/%s?server=%s", 
+    snprintf(url, sizeof(url), "%s/watch?episodeId=%s&server=%s", 
              ZORO_API_BASE_URL, episode_id, server);
-    
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (!curl) {

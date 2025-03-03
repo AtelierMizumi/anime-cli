@@ -6,7 +6,7 @@
 #include "mangadex.h"
 #include "../../utils/memory.h"
 
-#define MANGADEX_API_BASE_URL "https://api.mangadex.org"
+#define MANGADEX_API_BASE_URL "https://consumet.thuanc177.me/manga/mangadex"
 
 typedef struct {
     char *data;
@@ -37,8 +37,9 @@ SearchResult* mangadex_search_manga(const char *query) {
     MemoryStruct chunk = {NULL, 0};
     char url[512];
     
+    
     // Build URL for manga search endpoint
-    snprintf(url, sizeof(url), "%s/manga?title=%s&limit=20&contentRating[]=safe&contentRating[]=suggestive", 
+    snprintf(url, sizeof(url), "%s/%s", 
              MANGADEX_API_BASE_URL, query);
     
     curl_global_init(CURL_GLOBAL_DEFAULT);
