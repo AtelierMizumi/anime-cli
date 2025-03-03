@@ -1,9 +1,0 @@
-#ifndef VERSION_H
-#define VERSION_H
-
-#define ANIME_CLI_VERSION "0.2.0"
-#define ANIME_CLI_VERSION_MAJOR 0
-#define ANIME_CLI_VERSION_MINOR 2
-#define ANIME_CLI_VERSION_PATCH 0
-
-#endif /* VERSION_H */
