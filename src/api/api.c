@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "api.h"
+#include "providers/aniwatch.h"
 #include "providers/zoro.h"
 #include "providers/mangadex.h"
 
@@ -9,8 +10,9 @@
 static const ProviderAPI* provider_apis[PROVIDER_COUNT] = { NULL };
 
 // Provider support for content types
-static const bool provider_content_support[PROVIDER_COUNT][2] = {
+static const bool provider_content_support[PROVIDER_COUNT][3] = {
     // ANIME, MANGA
+    { true,  false }, // PROVIDER_ANIWATCH
     { true,  false }, // PROVIDER_ZORO
     { true,  false }, // PROVIDER_GOGOANIME
     { false, true  }  // PROVIDER_MANGADEX
@@ -18,6 +20,7 @@ static const bool provider_content_support[PROVIDER_COUNT][2] = {
 
 // Provider names
 static const char* provider_names[PROVIDER_COUNT] = {
+    "AniWatch",
     "Zoro",
     "GogoAnime",
     "MangaDex"
@@ -31,6 +34,7 @@ static const char* content_type_names[2] = {
 
 void api_init() {
     // Initialize provider APIs
+    provider_apis[PROVIDER_ANIWATCH] = aniwatch_get_api();
     provider_apis[PROVIDER_ZORO] = zoro_get_api();
     provider_apis[PROVIDER_MANGADEX] = mangadex_get_api();
     // Add more providers as they are implemented

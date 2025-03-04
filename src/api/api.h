@@ -5,6 +5,7 @@
 
 // Provider type enumeration
 typedef enum {
+    PROVIDER_ANIWATCH,
     PROVIDER_ZORO,
     PROVIDER_GOGOANIME,
     PROVIDER_MANGADEX,
