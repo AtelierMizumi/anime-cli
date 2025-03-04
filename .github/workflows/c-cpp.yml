@@ -33,7 +33,7 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LATEST_TAG" ]; then
             # No tag exists, create date-based version
-            VERSION="0.2.0-$(date +'%Y%m%d%H%M')"
+            VERSION="0.3.0-$(date +'%Y%m%d%H%M')"
             echo "No version found in PKGBUILD or git tags. Using fallback version: $VERSION"
           else
             # Tag exists, use it

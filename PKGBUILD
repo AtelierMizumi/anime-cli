@@ -1,6 +1,6 @@
 # Maintainer: Thuan Tran thuan.tran@thuanc177.me
 pkgname=anime-cli
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Command-line interface for searching and streaming anime and manga via Consumet API"
 arch=('x86_64')
