@@ -303,10 +303,11 @@ ZoroStreamInfo* zoro_get_episode_stream(const char *episode_id, const char *serv
     CURLcode res;
     MemoryStruct chunk = {NULL, 0};
     char url[512];
-    
-    // Build URL for episode streaming info endpoint
-    snprintf(url, sizeof(url), "%s/watch?episodeId=%s&server=%s", 
-             ZORO_API_BASE_URL, episode_id, server);
+
+    snprintf(url, sizeof(url), "%s/watch?episodeId=%s$both&server=%s", 
+             ZORO_API_BASE_URL, episode_id, server ? server : "vidstreaming");
+    fprintf(stderr, "DEBUG: Requesting URL: %s\n", url);
+
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (!curl) {
