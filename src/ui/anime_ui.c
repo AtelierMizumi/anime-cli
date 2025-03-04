@@ -5,6 +5,7 @@
 #include "anime_ui.h"
 #include "common/input.h"
 #include "common/display.h"
+#include "../api/providers/aniwatch.h"
 #include "../api/providers/zoro.h"
 #include "../api/anime.h"
 #include "../config.h"
@@ -391,7 +392,7 @@ void anime_ui_main_loop() {
             if (episode_id) {
                 // Get streaming link for the episode
                 ui_show_loading("Getting stream data...");
-                StreamInfo *stream_info = anime_get_episode_stream(episode_id, "vidstreaming");
+                StreamInfo *stream_info = anime_get_episode_stream(episode_id, NULL);
                 
                 if (stream_info && stream_info->sources_count > 0) {
                     // Play the episode

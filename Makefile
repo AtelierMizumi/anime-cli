@@ -7,6 +7,7 @@ SRC = src/main.c \
 	src/api/api.c \
 	src/api/anime.c \
 	src/api/manga.c \
+	src/api/providers/aniwatch.c \
 	src/api/providers/zoro.c \
 	src/api/providers/mangadex.c \
 	src/ui/ui.c \
