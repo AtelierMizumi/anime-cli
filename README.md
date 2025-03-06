@@ -147,6 +147,51 @@ anime-cli
 - **v**: Toggle subtitle visibility
 - **q**: Quit playback and return to episode menu
 
+## Manga Reading
+
+To read manga:
+
+1. Launch anime-cli and select "Manga" from the content selection menu
+2. Select "MangaDex" as your provider
+3. Search for a manga title
+4. Browse through the list of manga and select one
+5. Select a chapter to read
+6. The manga chapter will open in your preferred image viewer
+
+**Keyboard Shortcuts for Manga Selection:**
+
+- **↑/↓**: Navigate through manga/chapter list
+- **Enter**: Select manga/chapter
+- **Type any text**: Filter manga by title
+- **Type numbers**: When viewing chapters, jump to a specific chapter number
+- **ESC**: Clear filter
+- **q**: Return to previous menu
+
+**Image Viewing Shortcuts** (depends on your viewer):
+
+With **mcomix** (recommended):
+- **→/←**: Next/previous page
+
+- **Page Up/Down**: Next/previous page
+- **Home/End**: First/last page
+- **F**: Full screen toggle
+- **M**: Manga mode (right-to-left reading)
+
+With **feh**:
+- **→/←**: Next/previous image
+
+- **Space**: Next image
+- **Backspace**: Previous image
+- **q**: Quit
+
+With **sxiv**:
+- **→/←**: Next/previous image
+
+- **Space**: Next image
+- **Backspace**: Previous image
+- **f**: Toggle fullscreen
+- **q**: Quit
+
 ## 📸 Screenshots
 
 | Search Screen | Anime Selection | Episode Selection |

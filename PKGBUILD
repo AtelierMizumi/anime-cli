@@ -1,6 +1,6 @@
 # Maintainer: Thuan Tran thuan.tran@thuanc177.me
 pkgname=anime-cli
-pkgver=0.3.1
+pkgver=0.3.2
 pkgrel=1
 pkgdesc="Command-line interface for searching and streaming anime and manga via Consumet API"
 arch=('x86_64')
@@ -10,8 +10,11 @@ depends=('curl' 'json-c' 'ncurses' 'mpv' 'sxiv')
 makedepends=('gcc' 'make')
 optdepends=(
     'ffmpeg: for downloading anime episodes'
-    'feh: alternative manga viewer'
-    'imv: alternative manga viewer'
+    'mcomix: recommended manga viewer with comic book navigation'
+    'zathura: document viewer with manga mode'
+    'sxiv: alternative image viewer'
+    'feh: alternative image viewer'
+    'imv: alternative image viewer for X11/Wayland'
 )
 # Use branch instead of tag
 source=("git+${url}.git#branch=master")

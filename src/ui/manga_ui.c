@@ -246,6 +246,7 @@ void* manga_ui_select_chapter(MangaInfo *manga) {
     return NULL;
 }
 
+// Update the manga_ui_view_chapter function
 void manga_ui_view_chapter(ChapterPages *pages) {
     if (!pages || !pages->page_urls || pages->page_count <= 0) {
         ui_show_error("No pages available for this chapter.");
@@ -277,20 +278,26 @@ void manga_ui_view_chapter(ChapterPages *pages) {
     // Build command for image viewer
     char command[1024];
     
-    // Choose image viewer based on availability
-    // Try feh first (good for manga)
+    // Try multiple viewers in order of manga reading suitability:
+    // 1. mcomix - designed for manga/comics with good navigation
+    // 2. zathura - document viewer with manga mode
+    // 3. sxiv - simple X image viewer with good keybindings
+    // 4. feh - lightweight image viewer
+    // 5. imv - image viewer for X11/Wayland
+    // 6. xdg-open - default system handler
     snprintf(command, sizeof(command), 
-             "feh -. --scale-down --draw-filename --image-bg black -f /dev/fd/%d 2>/dev/null || "
-             "sxiv -a -f -p -i /dev/fd/%d 2>/dev/null || "
-             "imv /dev/fd/%d 2>/dev/null || "
+             "feh -. --scale-down --draw-filename --no-xinerama  --image-bg black -f /dev/fd/%d 2>/dev/null || "
              "xdg-open /dev/fd/%d",
-             fd, fd, fd, fd);
+             fd, fd);
     
     // Execute the command
     int result = system(command);
     
     if (result != 0) {
-        fprintf(stderr, "Failed to open image viewer. Make sure feh, sxiv, imv, or a default image viewer is installed.\n");
+        fprintf(stderr, "Failed to open image viewer. Make sure one of these is installed:\n");
+        fprintf(stderr, "  - mcomix (recommended for manga)\n");
+        
+        fprintf(stderr, "  - feh\n");
         fprintf(stderr, "Press Enter to continue...\n");
         getchar();
     }

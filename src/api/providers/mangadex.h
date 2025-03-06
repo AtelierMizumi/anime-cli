@@ -8,7 +8,7 @@ typedef struct {
     char *id;
     int number;
     char *title;
-    char *url;
+    char *releaseDate;
 } MangadexChapter;
 
 // Structure to hold complete manga information
@@ -30,6 +30,7 @@ typedef struct {
 typedef struct {
     char **page_urls;
     int page_count;
+    char *referer;  // HTTP referer for image loading if needed
 } MangadexChapterPages;
 
 // Get Mangadex provider API
