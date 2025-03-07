@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ncurses.h>
 #include "display.h"
+#include "../../config.h"
 
 void ui_show_error(const char *message) {
     clear();
@@ -37,4 +38,40 @@ void ui_draw_progress_bar(int percentage, int width) {
     }
     mvprintw(getcury(stdscr), getcurx(stdscr), "] %d%%", percentage);
     attroff(COLOR_PAIR(2));
+}
+
+void display_search_result_item(int y, int x, const SearchResultItem *item, bool selected) {
+    if (selected) {
+        attron(A_REVERSE);
+    }
+
+    // Clear the line
+    mvhline(y, x, ' ', COLS - x);
+    
+    // Display title with limited width
+    int max_title_width = COLS - x - 20; // Reserve space for episode/chapter count
+    mvprintw(y, x, "%.*s", max_title_width, item->title ? item->title : "Unknown Title");
+    
+    // Format and display episode/chapter count based on content type
+    if (item->content_type == CONTENT_ANIME) {
+        if (item->episodes_or_chapters > 0) {
+            mvprintw(y, COLS - 15, "[%d Episodes]", item->episodes_or_chapters);
+        } else {
+            mvprintw(y, COLS - 15, "[Unknown]");
+        }
+    } else if (item->content_type == CONTENT_MANGA) {
+        // For manga, we want to be more descriptive
+        if (item->episodes_or_chapters > 1) {
+            mvprintw(y, COLS - 15, "[%d Chapters]", item->episodes_or_chapters);
+        } else if (item->episodes_or_chapters == 1) {
+            // This could be a manga with just volume info or unknown chapter count
+            mvprintw(y, COLS - 15, "[Chapters]");
+        } else {
+            mvprintw(y, COLS - 15, "[Unknown]");
+        }
+    }
+    
+    if (selected) {
+        attroff(A_REVERSE);
+    }
 }

@@ -27,14 +27,14 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, Mem
     return realsize;
 }
 
+// Remove the replace_spaces_with_hyphens function as we'll use proper URL encoding instead
+
 SearchResult* aniwatch_search_anime(const char *query) {
     CURL *curl;
     CURLcode res;
     MemoryStruct chunk = {NULL, 0};
     char url[512];
-    
-    // Build URL for anime search endpoint
-    snprintf(url, sizeof(url), "%s/api/v2/hianime/search?q=%s", ANIWATCH_API_BASE_URL, query);
+    char *encoded_query = NULL;
     
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -42,6 +42,23 @@ SearchResult* aniwatch_search_anime(const char *query) {
         fprintf(stderr, "Failed to initialize curl\n");
         return NULL;
     }
+    
+    // Properly URL encode the query string
+    encoded_query = curl_easy_escape(curl, query, 0);
+    if (!encoded_query) {
+        fprintf(stderr, "Failed to URL-encode query string\n");
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return NULL;
+    }
+    
+    // Build URL for anime search endpoint
+    snprintf(url, sizeof(url), "%s/api/v2/hianime/search?q=%s", ANIWATCH_API_BASE_URL, encoded_query);
+    
+    fprintf(stderr, "DEBUG: Requesting URL: %s\n", url);
+    
+    // Free the encoded query as it's no longer needed
+    curl_free(encoded_query);
     
     // Set up curl options
     curl_easy_setopt(curl, CURLOPT_URL, url);

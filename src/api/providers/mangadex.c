@@ -150,37 +150,51 @@ SearchResult* mangadex_search_manga(const char *query) {
         if (json_object_object_get_ex(manga_obj, "image", &field))
             search_result->results[i].image = strdup(json_object_get_string(field));
         
-        // Try to extract chapter count from lastChapter field
-    if (json_object_object_get_ex(manga_obj, "lastChapter", &field)) {
-        const char *lastChapter = json_object_get_string(field);
-        if (lastChapter && *lastChapter) {  // Make sure it's not NULL or empty string
-            search_result->results[i].episodes_or_chapters = atoi(lastChapter);
-        }
-    }
-
-    // If lastChapter is empty or not found, check for other fields
-    if (search_result->results[i].episodes_or_chapters == 0) {
-        // Try lastVolume field
-        if (json_object_object_get_ex(manga_obj, "lastVolume", &field)) {
-            const char *lastVolume = json_object_get_string(field);
-            if (lastVolume && *lastVolume) {
-                // Just indicate that volumes exist
-                search_result->results[i].episodes_or_chapters = 1;
+        // Extract chapter/volume information with better fallback mechanism
+        search_result->results[i].episodes_or_chapters = 0;
+        bool has_chapter_info = false;
+        
+        // Try to get chapter count from lastChapter field
+        if (json_object_object_get_ex(manga_obj, "lastChapter", &field)) {
+            const char *lastChapter = json_object_get_string(field);
+            if (lastChapter && *lastChapter) {  // Make sure it's not NULL or empty string
+                search_result->results[i].episodes_or_chapters = atoi(lastChapter);
+                has_chapter_info = true;
             }
         }
-    }
-
-    // If we still don't have chapter info, check status
-    if (search_result->results[i].episodes_or_chapters == 0) {
-        // For completed manga with no chapter count, show at least 1
-        struct json_object *status_field;
-        if (json_object_object_get_ex(manga_obj, "status", &status_field)) {
-            const char *status = json_object_get_string(status_field);
-            if (status && (strcmp(status, "completed") == 0 || strcmp(status, "finished") == 0)) {
-                search_result->results[i].episodes_or_chapters = 1;
+        
+        // If lastChapter doesn't provide useful info, check other fields
+        if (!has_chapter_info) {
+            // Try using the numChapters field if available
+            if (json_object_object_get_ex(manga_obj, "numChapters", &field)) {
+                int numChapters = json_object_get_int(field);
+                if (numChapters > 0) {
+                    search_result->results[i].episodes_or_chapters = numChapters;
+                    has_chapter_info = true;
+                }
+            }
+            
+            // If still no chapter info, check volume info
+            if (!has_chapter_info && json_object_object_get_ex(manga_obj, "lastVolume", &field)) {
+                const char *lastVolume = json_object_get_string(field);
+                if (lastVolume && *lastVolume) {
+                    // For volumes, we'll store a minimum value to indicate volumes exist
+                    // This will display differently in the UI
+                    search_result->results[i].episodes_or_chapters = 1;
+                }
+            }
+            
+            // If we still don't have info but manga is completed, show at least 1
+            if (!has_chapter_info) {
+                struct json_object *status_field;
+                if (json_object_object_get_ex(manga_obj, "status", &status_field)) {
+                    const char *status = json_object_get_string(field);
+                    if (status && (strcmp(status, "completed") == 0 || strcmp(status, "finished") == 0)) {
+                        search_result->results[i].episodes_or_chapters = 1;
+                    }
+                }
             }
         }
-    }
     }
     
     // Clean up
