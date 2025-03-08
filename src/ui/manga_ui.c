@@ -275,29 +275,43 @@ void manga_ui_view_chapter(ChapterPages *pages) {
     // Get file descriptor
     int fd = fileno(temp_file);
     
-    // Build command for image viewer
+    // Print usage instructions for the image viewer
+    printf("\n===== Manga Reader Controls =====\n");
+    printf("• Left-click and drag: Pan around the image\n");
+    printf("• Mouse wheel: Zoom in/out\n");
+    printf("• Right-click: Toggle fullscreen\n");
+    printf("• Arrow keys / Space / Backspace: Navigate between pages\n");
+    printf("• q: Quit viewer and return to menu\n");
+    printf("• m: Toggle menu to access more options\n");
+    printf("===================================\n\n");
+    printf("Loading manga pages, please wait...\n");
+    
+    // Build command for image viewer with improved options for manga reading
     char command[1024];
     
-    // Try multiple viewers in order of manga reading suitability:
-    // 1. mcomix - designed for manga/comics with good navigation
-    // 2. zathura - document viewer with manga mode
-    // 3. sxiv - simple X image viewer with good keybindings
-    // 4. feh - lightweight image viewer
-    // 5. imv - image viewer for X11/Wayland
-    // 6. xdg-open - default system handler
+    // Enhanced feh command specifically for manga/manhua reading:
+    // --auto-zoom: Fits the image initially to the window
+    // --fullscreen: Starts in fullscreen mode for better reading
+    // --draw-filename: Shows the current page number
+    // --hide-pointer: Hides mouse pointer when not moving
+    // --scale-down: Ensures image is not larger than screen
+    // --image-bg black: Sets black background for contrast
+    // --scroll-step 50: Faster scrolling for long images
     snprintf(command, sizeof(command), 
-             "feh -. --scale-down --draw-filename --no-xinerama  --image-bg black -f /dev/fd/%d 2>/dev/null || "
+             "feh --auto-zoom --fullscreen --draw-filename --hide-pointer "
+             "--scale-down --image-bg black --scroll-step 50 "
+             "-Y -f /dev/fd/%d 2>/dev/null || "
+             "sxiv -f -p -b -i -f /dev/fd/%d 2>/dev/null || "
              "xdg-open /dev/fd/%d",
-             fd, fd);
+             fd, fd, fd);
     
     // Execute the command
     int result = system(command);
     
     if (result != 0) {
         fprintf(stderr, "Failed to open image viewer. Make sure one of these is installed:\n");
-        fprintf(stderr, "  - mcomix (recommended for manga)\n");
-        
-        fprintf(stderr, "  - feh\n");
+        fprintf(stderr, "  - feh (recommended for manga viewing)\n");
+        fprintf(stderr, "  - sxiv (alternative image viewer)\n");
         fprintf(stderr, "Press Enter to continue...\n");
         getchar();
     }

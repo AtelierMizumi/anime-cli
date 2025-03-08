@@ -1,6 +1,6 @@
 # Maintainer: Thuan Tran thuan.tran@thuanc177.me
 pkgname=anime-cli
-pkgver=0.3.3
+pkgver=0.3.4
 pkgrel=1
 pkgdesc="Command-line interface for searching and streaming anime and manga via Consumet API"
 arch=('x86_64')
@@ -14,7 +14,6 @@ optdepends=(
     'zathura: document viewer with manga mode'
     'sxiv: alternative image viewer'
     'feh: alternative image viewer'
-    'imv: alternative image viewer for X11/Wayland'
 )
 # Use branch instead of tag
 source=("git+${url}.git#branch=master")
