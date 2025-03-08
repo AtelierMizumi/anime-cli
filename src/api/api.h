@@ -7,7 +7,6 @@
 typedef enum {
     PROVIDER_ANIWATCH,
     PROVIDER_ZORO,
-    PROVIDER_GOGOANIME,
     PROVIDER_MANGADEX,
     PROVIDER_COUNT
 } ProviderType;

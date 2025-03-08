@@ -36,6 +36,8 @@ SearchResult* aniwatch_search_anime(const char *query) {
     char url[512];
     char *encoded_query = NULL;
     
+    fprintf(stderr, "DEBUG: AniWatch search query: '%s'\n", query);
+    
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (!curl) {
@@ -55,9 +57,9 @@ SearchResult* aniwatch_search_anime(const char *query) {
     // Build URL for anime search endpoint
     snprintf(url, sizeof(url), "%s/api/v2/hianime/search?q=%s", ANIWATCH_API_BASE_URL, encoded_query);
     
-    fprintf(stderr, "DEBUG: Requesting URL: %s\n", url);
+    fprintf(stderr, "DEBUG: AniWatch Requesting URL: %s\n", url);
     
-    // Free the encoded query as it's no longer needed
+    // Free the encoded query after building the URL
     curl_free(encoded_query);
     
     // Set up curl options
@@ -385,9 +387,11 @@ StreamInfo* aniwatch_get_episode_stream(const char *episode_id, const char *serv
         curl_global_cleanup();
         return NULL;
     }
-    
+
     // Check if the response was successful
     struct json_object *success_obj;
+
+    
     if (!json_object_object_get_ex(json_obj, "success", &success_obj) || 
         !json_object_get_boolean(success_obj)) {
         fprintf(stderr, "API returned unsuccessful response\n");

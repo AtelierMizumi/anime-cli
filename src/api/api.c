@@ -14,7 +14,6 @@ static const bool provider_content_support[PROVIDER_COUNT][3] = {
     // ANIME, MANGA
     { true,  false }, // PROVIDER_ANIWATCH
     { true,  false }, // PROVIDER_ZORO
-    { true,  false }, // PROVIDER_GOGOANIME
     { false, true  }  // PROVIDER_MANGADEX
 };
 
@@ -22,7 +21,6 @@ static const bool provider_content_support[PROVIDER_COUNT][3] = {
 static const char* provider_names[PROVIDER_COUNT] = {
     "AniWatch",
     "Zoro",
-    "GogoAnime",
     "MangaDex"
 };
 

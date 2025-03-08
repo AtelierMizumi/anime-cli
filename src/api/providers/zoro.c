@@ -32,9 +32,26 @@ SearchResult* zoro_search_anime(const char *query) {
     CURLcode res;
     MemoryStruct chunk = {NULL, 0};
     char url[512];
+    char *encoded_query = NULL;
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+    if (!curl) {
+        fprintf(stderr, "Failed to initialize curl\n");
+        return NULL;
+    }
+
+    // Properly URL encode the query string
+    encoded_query = curl_easy_escape(curl, query, 0);
+    if (!encoded_query) {
+        fprintf(stderr, "Failed to URL-encode query string\n");
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return NULL;
+    }
     
     // Build URL for anime search endpoint
-    snprintf(url, sizeof(url), "%s/%s", ZORO_API_BASE_URL, query);
+    snprintf(url, sizeof(url), "%s/%s", ZORO_API_BASE_URL, encoded_query);
     
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -135,6 +152,7 @@ SearchResult* zoro_search_anime(const char *query) {
     json_object_put(json_obj);
     free(chunk.data);
     curl_global_cleanup();
+    free(encoded_query);
     
     return search_result;
 }
